@@ -13,12 +13,10 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-    'telegram' => [
-        'bot_token' => '7635194878:AAF7_isydhFtD1P1DTseKVDpN8hAMgOMArc',
-    ],
     'telegram-bot-api' => [
         'token' => env('TELEGRAM_BOT_TOKEN', '7635194878:AAF7_isydhFtD1P1DTseKVDpN8hAMgOMArc')
     ],
+    'telegram_chat_id' => env('TELEGRAM_CHAT_ID', '-4516888819'),
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

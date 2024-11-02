@@ -1,38 +1,49 @@
 <?php
-use Illuminate\Support\Facades\Http;
+
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
+
+// ======== Testing Third Party Api =========
+
+// Use Gmail Server for sent mail
 use Illuminate\Support\Facades\Mail;
 use App\Mail\HelloMail;
 
-Route::get('/test-mail', function () {
+Route::get('/gmail-test', function () {
 
-    Mail::to('rabunthoeun7777@gmail.com')
+    Mail::to('longsoeng096@gmail.com')
         ->send(new HelloMail());
 
     return 'Mail Sent Successful!';
 });
 
-Route::get('/test_send_message', function () {
-    $botToken = '7635194878:AAF7_isydhFtD1P1DTseKVDpN8hAMgOMArc';
-    $chatId = '-1670274507';
-    $message = "Hello from Laravel! This is a test message to your Telegram group.";
 
-    $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+// Use Telegram API for notification
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\MyTelegramBotNotification;
 
-    // Log URL and parameters
-    \Log::info("Sending request to Telegram API with URL: $url and Chat ID: $chatId");
-
-    $response = Http::post($url, [
-        'chat_id' => $chatId,
-        'text' => $message,
-    ]);
-
-    if ($response->successful()) {
-        return "Message sent to Telegram!";
-    } else {
-        \Log::error("Telegram API Error: " . $response->status() . " - " . $response->body());
-        return "Failed to send message: " . $response->body();
+Route::get('/telegram-test', function () {
+    try {
+        Notification::route('telegram', config('services.telegram_chat_id'))
+            ->notify(new MyTelegramBotNotification());
+    } catch (\Exception $e) {
+        Log::error('Notification failed: ' . $e->getMessage());
     }
+    return 'Notification sent!';
 });
-
-
